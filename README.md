@@ -1,59 +1,67 @@
-# 🛠️ ThreadFlow
+# ThreadFlow
 
-**ThreadFlow** is a powerful thread management tool designed specifically for Roblox developers. It helps you efficiently handle concurrent tasks by managing a pool of threads and a task queue, ensuring optimal performance for your game.
+**ThreadFlow** is a robust thread management utility tailored for Roblox developers. It optimizes concurrent task handling by managing a pool of threads and a task queue, ensuring smooth game performance.
 
-## 🌟 Features
+## Purpose
 
-- **Customizable Pool Size**: Define the maximum number of active threads. 🔢
-- **Task Queue Management**: Automatically queues tasks when the pool is full and processes them as threads become available. 📋
-- **Configurable Queue Size**: Limits the size of the task queue to prevent overflow. 🚫
-- **Task Cancellation**: Remove specific tasks from the queue. ❌
-- **Graceful Shutdown**: Complete all queued tasks or force stop immediately. 🔄
-- **Force Run**: Run tasks immediately if no threads are available. ⚡
+ThreadFlow simplifies the management of concurrent tasks in Roblox games. It enables structured handling of multiple tasks simultaneously without overloading the system, ensuring smooth gameplay and efficient background operations.
 
-## 🎯 Purpose
+## Why This Tool Exists
 
-ThreadFlow exists to simplify the management of concurrent tasks in Roblox games. It provides a structured way to handle multiple tasks simultaneously without overwhelming the system, ensuring that your game runs smoothly even when dealing with numerous background operations.
+Efficiently managing concurrent tasks is crucial in Roblox game development to maintain performance and responsiveness. Tasks like player data updates, in-game event handling, and UI processing can become bottlenecks without proper management. ThreadFlow addresses these challenges by providing an effective thread pool and task queue system to offload and manage tasks efficiently.
 
-## 🛠️ Why This Tool Exists
+## Installation
 
-In Roblox game development, handling multiple tasks concurrently is crucial for maintaining performance and responsiveness. Tasks such as updating player data, processing in-game events, and handling UI updates can often become bottlenecks if not managed properly. ThreadFlow was created to address these challenges by offering an efficient way to manage a pool of threads and a task queue, allowing developers to offload tasks and keep their games running efficiently.
+Include the **ThreadFlow** script in your project by placing it in a location accessible to your game scripts.
 
-## 🚀 Installation
-
-To use **ThreadFlow**, simply include it in your project by placing the script in a location accessible by your game scripts.
-
-## 📚 API Documentation
+## API Documentation
 
 ### `ThreadFlow.new(pool_size: number, queue_size: number) -> ThreadFlow`
 
 Creates a new thread pool instance.
 
-- `pool_size`: The maximum number of active threads. 🌐
-- `queue_size`: The maximum number of tasks in the queue. 📈
+- **pool_size**: The maximum number of active threads.
+- **queue_size**: The maximum number of tasks allowed in the queue.
 
 ### `ThreadFlow:run(func: (...any) -> any?, ...any)`
 
-Runs a task function with provided arguments.
+Executes a task function with the provided arguments.
 
-- `func`: The task function to execute. 🛠️
-- `...any`: Arguments to pass to the task function. 🎯
+- **func**: The task function to execute.
+- **...any**: Arguments to pass to the task function.
 
 ### `ThreadFlow:forceRun(func: (...any) -> any?, ...any)`
 
-Forces the execution of a task even if no threads are available.
+Forces the execution of a task even when no threads are available.
 
-- `func`: The task function to execute. ⚡
-- `...any`: Arguments to pass to the task function. 🎯
+- **func**: The task function to execute.
+- **...any**: Arguments to pass to the task function.
 
 ### `ThreadFlow:cancelTask(func: (...any) -> any?)`
 
 Cancels a specific task from the queue.
 
-- `func`: The task function to cancel. 🚫
+- **func**: The task function to cancel.
 
 ### `ThreadFlow:shutdown(force: boolean)`
 
-Shuts down the thread pool, optionally forcing immediate shutdown.
+Shuts down the thread pool, optionally forcing an immediate shutdown.
 
-- `force`: If `true`, force shutdown without waiting for tasks to complete. ⏳
+- **force**: If `true`, forces shutdown without waiting for tasks to complete.
+
+## Example Usage
+
+```lua
+local ThreadFlow = require(path.to.ThreadFlow)
+
+local pool = ThreadFlow.new(5, 10)
+
+pool:run(function(arg1, arg2)
+    print("Task running with arguments:", arg1, arg2)
+end, "argument1", "argument2")
+
+pool:shutdown(false)
+```
+
+This example demonstrates creating a thread pool, running a task, and shutting down the pool.
+
