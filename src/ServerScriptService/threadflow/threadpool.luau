@@ -1,13 +1,16 @@
 export type threadpoolImpl = {
 	__index: threadpoolImpl,
-	
+
 	new: (pool_size: number, queue_size: number) -> threadpoolImpl,
-	run: (func: (...any) -> any?, ...any) -> (),
+	run: (func: (...any) -> any, ...any) -> (),
+	forceRun: (func: (...any) -> any, ...any) -> (),
+	cancelTask: (func:(...any) -> any) -> (),
+	processQueue: () -> (),
+	clearQueue: () -> (),
 	shutdown: (force: boolean) -> (),
-	cancelTask: (func:(...any) -> any?) -> (),
-	
+
 	pool_size: number, -- unsigned integer.
-	task_queue: {func: (...any) -> any?},
+	task_queue: {[number]: {func: (...any) -> any, parallel : boolean, args: {any}}},
 	queue_size: number, -- unsigned integer. prevents the queue from growing indefinitely.
 	active_threads: number,
 }
@@ -17,6 +20,7 @@ thread_pool.__index = thread_pool
 
 function thread_pool.new(pool_size : number, queue_size : number)
 	local self = setmetatable({}, thread_pool) :: threadpoolImpl
+	if not pool_size then pool_size = 1 end
 	if pool_size <= 0 then pool_size = 1 end
 	self.pool_size = pool_size
 	self.task_queue = {}
@@ -39,7 +43,7 @@ function thread_pool:run(func : (...any) -> any?, ...)
 		end, ...)
 		--[[print(`task {func} has been succesfully ran, freeing up the thread.`)]]
 	else
-		table.insert(self.task_queue, {func, {...}})
+		table.insert(self.task_queue, {func, false, {...}})
 		--[[print(`all threads are in use, adding task {func} to the queue.`)]]
 	end
 end
@@ -49,7 +53,7 @@ If there isn't an active thread available, create one and run the task.
 DOESN'T increment active_threads not to fiddle with other tasks trying to run.
 ]]
 function thread_pool:forceRun(func : (...any) -> any?, ...)
-	if self.active_threads == 0 then
+	if self.active_threads >= self.pool_size then
 		task.spawn(function(...)
 			func(...)
 		end, ...)
@@ -75,7 +79,12 @@ end
 function thread_pool:processQueue()
 	if #self.task_queue > 0 and self.active_threads < self.pool_size then
 		local dequeued_task = table.remove(self.task_queue, 1)
-		self:run(dequeued_task[1], table.unpack(dequeued_task[2]))
+		local isParallel = dequeued_task[2]
+		if not isParallel then
+			self:run(dequeued_task[1], table.unpack(dequeued_task[3]))
+			return
+		end
+		self:parallelRun(dequeued_task[1], table.unpack(dequeued_task[3]))
 	end
 end
 
